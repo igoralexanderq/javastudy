@@ -1,0 +1,116 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
+h1 {
+    color: #686868;  
+    margin: 0;  
+}
+
+body * {
+    /*border: 1px solid gray;*/
+}
+
+@media only screen and (max-width: 600px) {
+    body {
+        display: grid;
+        grid-template-areas:
+            "header"
+            "content"
+            "footer";
+        grid-template-rows: 50px auto 50px;
+        grid-template-columns: 100%; /**Eurekaaaaa*/
+    }
+
+    header {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    header > * {        
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;        
+        width: 25px;
+        margin: 0 8px;
+    }
+
+    header > options {
+        background-image: url("resources/menu-alt-1-svgrepo-com.svg");
+    }
+
+    header > logo {
+        background-image: url("resources/leaves-leaf-svgrepo-com.svg");
+    }
+
+    header > statistics {
+        background-image: url("resources/stats-svgrepo-com.svg");
+    }
+    
+    content {
+        margin: 0 8px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    content > plants {
+        display: flex;
+        flex-direction: column;
+    }
+
+    content > plants > wrappers {
+        position: relative;
+        display: flex;
+        justify-content: flex-start;
+        overflow-x: auto;
+    }
+
+    content > plants > wrappers::-webkit-scrollbar {
+        display: none;
+    }
+
+    content > plants > wrappers > wrapper {        
+        position: relative;
+        background-color: #dfdfdf;
+        border-radius: 8px;
+        width: 122px;
+        margin: 30px 6px 0 0;
+        padding: 5px 5px;
+        display: grid;
+        grid-template-columns: 25px auto;
+        grid-template-rows: 110px auto;
+        grid-template-areas:
+            "status"
+            "product-image"
+            "description";
+    }
+
+    content > plants > wrappers > wrapper:last-child {
+        margin-right: 0;
+    }
+
+    content > plants > wrappers > wrapper > description {
+        display: flex;
+        flex-direction: column;
+        grid-column: span 2;
+    }
+
+    content > plants > wrappers > wrapper > product-image {
+        position: relative;
+        right: 0;
+        top: -30px
+    }
+
+    content > plants > wrappers > wrapper > description > * {
+        padding: 0 5px;
+        color: #3f3f3f;       
+        font-size: 0.80em;
+    }
+}

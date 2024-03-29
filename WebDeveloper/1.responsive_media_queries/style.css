@@ -1,0 +1,69 @@
+/* Estilos para pantallas pequeñas (móviles) */
+* {
+    margin: 0;
+    font-family: 'Nunito';
+    font-size: 14px;
+}
+
+html {    
+    height: 100%;
+    background-color: red;
+}
+
+body {
+    height: 100%;
+}
+
+@media only screen and (max-width: 600px) {
+    /* Inserta aquí tus estilos para pantallas pequeñas */
+    
+
+    body {
+        background-color: grey;        
+        display: grid;
+        grid-template-areas: 
+            "header"
+            "content"
+            "footer";
+        grid-template-rows: 90px auto 50px;
+    }
+
+    header {
+        display: grid;
+        grid-template-columns: 120px auto;
+        grid-template-areas: 
+            "menu search"
+            "navigate";
+
+    }
+
+    navigate {
+        grid-column: span 2;
+    }
+    
+    body > *,
+    header > *{
+        border-color: black;
+        border-radius: 3px;
+        border-style: solid;
+       
+    }
+
+
+}
+
+/* Estilos para pantallas medianas (tablets) */
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
+    /* Inserta aquí tus estilos para pantallas medianas */
+    html {
+            background-color: green;
+        }
+}
+
+/* Estilos para pantallas grandes (escritorios) */
+@media only screen and (min-width: 1025px) {
+    /* Inserta aquí tus estilos para pantallas grandes */
+    html {
+            background-color: yellow;
+    }
+}
