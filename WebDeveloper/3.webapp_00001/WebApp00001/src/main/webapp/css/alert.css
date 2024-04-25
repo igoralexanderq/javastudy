@@ -1,0 +1,36 @@
+.alert {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    font-family: "Raleway", sans-serif;
+    
+    left: 5px;
+    bottom: 5px;
+    font-size: 0.8rem;
+    padding: 5px 8px;
+    border-radius: 5px;    
+    transition: opacity 1s ease;
+}
+
+.alert > * {
+    padding: 0 5px;
+}
+
+.ico {
+    font-size: 1.5rem;
+    
+}
+
+.error {
+    background-color: #fcb1a0;
+    color: red;
+}
+
+.success {
+    background-color: #b4d3b2;
+    color: green;
+}
+
+.out {
+    opacity: 0;
+}
