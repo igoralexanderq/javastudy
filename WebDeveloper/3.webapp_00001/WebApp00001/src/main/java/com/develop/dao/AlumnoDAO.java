@@ -5,6 +5,8 @@
 package com.develop.dao;
 
 import com.develop.dto.AlumnoDTO;
+
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -12,9 +14,9 @@ import java.util.List;
  * @author Alexander
  */
 public interface AlumnoDAO {
-    public List getAlumnos();
-    public int createAlumno(AlumnoDTO alumno);
-    public int updateAlumno(AlumnoDTO alumno);
-    public AlumnoDTO getAlumno(int idalumno);
-    public int deleteAlumno(String idx);
+    public List getAlumnos() throws SQLException;
+    public int createAlumno(AlumnoDTO alumno) throws SQLException;
+    public int updateAlumno(AlumnoDTO alumno) throws SQLException;
+    public AlumnoDTO getAlumno(int idalumno) throws SQLException;
+    public int deleteAlumno(String idx) throws SQLException;
 }

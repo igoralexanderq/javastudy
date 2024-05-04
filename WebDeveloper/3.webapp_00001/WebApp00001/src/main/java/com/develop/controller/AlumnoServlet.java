@@ -99,17 +99,7 @@ public class AlumnoServlet extends HttpServlet {
         try {     
             AlumnoDAO alumnoDAO = new AlumnoDAOImpl();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            int i = alumnoDAO.createAlumno(new AlumnoDTO(
-                    0, 
-                    request.getParameter("appaterno"),
-                    request.getParameter("apmaterno"),
-                    request.getParameter("nombres"),                    
-                    new java.sql.Date(sdf.parse(request.getParameter("nacimiento")).getTime()),
-                    request.getParameter("direccion"),
-                    request.getParameter("referencia"),
-                    request.getParameter("genero"),
-                    request.getParameter("estado")
-            ));
+            int i = alumnoDAO.createAlumno(validate(request));
             if(i > 0){
                 MensajeDTO msg = new MensajeDTO(0, "", 0, "Items created: " + i);      //Create Message
                 response.getWriter().write(gson.toJson(msg));                                //Convert to JSON and Write                
@@ -121,7 +111,7 @@ public class AlumnoServlet extends HttpServlet {
                 logger.error("createAlumno: " + hash);
                 logger.error("createAlumno: No se registró el alumno.");                    //Logging hash
             }           
-        } catch (ParseException e) {                                                              //EXCEPTION
+        } catch (Exception e) {                                                              //EXCEPTION
             String hash = Util.getHash();                                                         //Generate hash
             response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                               //Set Status Server
             MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);         //Create Message
@@ -168,15 +158,7 @@ public class AlumnoServlet extends HttpServlet {
         try {
             AlumnoDAO alumnoDAO = new AlumnoDAOImpl();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            AlumnoDTO alumnoDTO = new AlumnoDTO();
-            alumnoDTO.setIdalumno(Integer.parseInt(request.getParameter("alumno")));
-            alumnoDTO.setAppaterno(request.getParameter("appaterno"));
-            alumnoDTO.setApmaterno(request.getParameter("apmaterno"));
-            alumnoDTO.setNombres(request.getParameter("nombres"));
-            alumnoDTO.setNacimiento(new java.sql.Date(sdf.parse(request.getParameter("nacimiento")).getTime()));
-            alumnoDTO.setDireccion(request.getParameter("direccion"));
-            alumnoDTO.setReferencia(request.getParameter("referencia"));
-            alumnoDTO.setGenero(request.getParameter("genero"));            
+            AlumnoDTO alumnoDTO = validate(request);
             int i = alumnoDAO.updateAlumno(alumnoDTO);
             if(i > 0) {
                 MensajeDTO msg = new MensajeDTO(0, "", 0, "Items updated: " + i);      //Create Message
@@ -189,7 +171,7 @@ public class AlumnoServlet extends HttpServlet {
                 logger.error("updateAlumno: " + hash);
                 logger.error("updateAlumno: No se actualizó el alumno.");                    //Logging hash
             }
-        } catch (IOException | NumberFormatException | ParseException e) {
+        } catch (IOException | NumberFormatException e) {
             String hash = Util.getHash();                                                         //Generate hash
             response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                               //Set Status Server
             MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);         //Create Message
@@ -226,6 +208,20 @@ public class AlumnoServlet extends HttpServlet {
             logger.error("deleteAlumno: " + hash);                                                //Logging hash
             logger.error("deleteAlumno: " + e.getMessage(), e);                             //Logging exception
         }
+    }
+
+    public AlumnoDTO validate(HttpServletRequest request) {
+        AlumnoDTO alumnoDTO = new AlumnoDTO();
+        alumnoDTO.setIdalumno(Integer.parseInt(request.getParameter("idalumno")));
+        alumnoDTO.setAppaterno(request.getParameter("appaterno"));
+        alumnoDTO.setApmaterno(request.getParameter("apmaterno"));
+        alumnoDTO.setNombres(request.getParameter("nombres"));
+        alumnoDTO.setNacimiento(java.sql.Date.valueOf(request.getParameter("nacimiento")));
+        alumnoDTO.setDireccion(request.getParameter("direccion"));
+        alumnoDTO.setReferencia(request.getParameter("referencia"));
+        alumnoDTO.setGenero(request.getParameter("genero"));
+        alumnoDTO.setEstado(request.getParameter("estado"));
+        return alumnoDTO;
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

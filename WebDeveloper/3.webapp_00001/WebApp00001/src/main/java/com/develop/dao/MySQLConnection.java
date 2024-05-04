@@ -44,7 +44,7 @@ public class MySQLConnection {
     }
     
     public static synchronized Connection get()  {                        
-        try {
+        try {            
             if(instance == null || instance.connection.isClosed()) {            
                 instance = new MySQLConnection();
             }
