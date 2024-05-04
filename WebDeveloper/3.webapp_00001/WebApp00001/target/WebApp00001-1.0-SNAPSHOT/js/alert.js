@@ -10,8 +10,10 @@ class Alert {
         this._body = document.body;
         this._errCls = 'error';
         this._susCls = 'success';
-        this._errIco = '&#x26A0;';
+        this._warmCls = 'warning';
+        this._errIco = '&#x2715;'; 
         this._successIco = '&#x2714;';
+        this._warningIco = '&#x26A0;';
     }
     
     set body(body) {
@@ -35,6 +37,14 @@ class Alert {
         let _obj = Alert.get();
         let _code = Alert.getCode();
         _body.innerHTML += Alert.htmlSuccess(_code, _obj._susCls, _obj._successIco, message);
+        //Alert.addOutAnimation(_code, 1000);
+    }
+
+    static warning(message) {
+        let _body = Alert.get().body;
+        let _obj = Alert.get();
+        let _code = Alert.getCode();
+        _body.innerHTML += Alert.htmlWarning(_code, _obj._warmCls, _obj._warningIco, message);
         //Alert.addOutAnimation(_code, 1000);
     }
     
@@ -62,6 +72,20 @@ class Alert {
     }
     
     static htmlSuccess(id, cls, ico, msg) {
+        let _html = `
+            <alert id='${id}' class='alert ${cls}'>
+                <ico class='ico'>
+                    ${ico}
+                </ico>
+                <message>                    
+                    ${msg}
+                </message>
+            </alert>
+        `;
+        return _html;
+    }
+
+    static htmlWarning(id, cls, ico, msg) {
         let _html = `
             <alert id='${id}' class='alert ${cls}'>
                 <ico class='ico'>

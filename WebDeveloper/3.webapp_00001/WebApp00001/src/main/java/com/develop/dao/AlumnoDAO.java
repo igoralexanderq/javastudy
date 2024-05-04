@@ -14,7 +14,7 @@ import java.util.List;
  * @author Alexander
  */
 public interface AlumnoDAO {
-    public List getAlumnos() throws SQLException;
+    public List<AlumnoDTO> getAlumnos() throws SQLException;
     public int createAlumno(AlumnoDTO alumno) throws SQLException;
     public int updateAlumno(AlumnoDTO alumno) throws SQLException;
     public AlumnoDTO getAlumno(int idalumno) throws SQLException;

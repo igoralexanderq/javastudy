@@ -10,4 +10,6 @@ package com.develop.util;
  */
 public class ServerMessage {
     public static String M500 = "Error Interno en el Servidor";
+    public static final String EXCEPTION = "One exception occurred";
+    public static final String NOT_RECORDS_FOUND = "No records found";
 }

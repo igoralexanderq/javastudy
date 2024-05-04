@@ -1,6 +1,7 @@
 com\develop\dto\MensajeDTO.class
 com\develop\controller\AlumnoServlet.class
 com\develop\dto\FechaDTO.class
+com\develop\util\HtmlResponseCode.class
 com\develop\util\ServerMessage.class
 com\develop\util\Util.class
 com\develop\dao\MySQLConnectionOld.class
@@ -11,4 +12,3 @@ com\develop\dao\MySQLConnection.class
 com\develop\application\Main.class
 com\develop\dao\AlumnoDAO.class
 com\develop\dto\AlumnoDTO.class
-com\develop\util\HtmlError.class

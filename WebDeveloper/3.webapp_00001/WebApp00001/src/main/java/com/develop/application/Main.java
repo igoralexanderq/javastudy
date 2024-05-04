@@ -4,14 +4,12 @@
  */
 package com.develop.application;
 
-import com.develop.dao.AlumnoDAOImpl;
-
 /**
  *
  * @author Alexander
  */
 public class Main {
     public static void main(String[] args) {
-        System.out.println(new AlumnoDAOImpl().getAlumnos().toString());
+        //System.out.println(new AlumnoDAOImpl().getAlumnos().toString());
     }
 }

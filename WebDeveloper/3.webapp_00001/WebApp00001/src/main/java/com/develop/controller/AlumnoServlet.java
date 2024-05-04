@@ -9,14 +9,15 @@ import com.develop.dao.AlumnoDAO;
 import com.develop.dao.AlumnoDAOImpl;
 import com.develop.dto.MensajeDTO;
 import com.develop.dto.AlumnoDTO;
-import com.develop.util.HtmlError;
+import com.develop.util.HtmlResponseCode;
 import com.develop.util.ServerMessage;
 import com.develop.util.Util;
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.text.ParseException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.logging.Level;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -31,7 +32,16 @@ import org.slf4j.LoggerFactory;
  */
 @WebServlet(urlPatterns = {"/AlumnoServlet"})
 public class AlumnoServlet extends HttpServlet {
+    private AlumnoDAO alumnoDAO;
+    private Gson gson;
+    private SimpleDateFormat sdf;
     private static final Logger logger = LoggerFactory.getLogger(AlumnoServlet.class);
+
+    public AlumnoServlet() {
+        this.alumnoDAO = new AlumnoDAOImpl();
+        this.gson = new Gson();
+        this.sdf = new SimpleDateFormat("yyyy-MM-dd");
+    }
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -41,9 +51,10 @@ public class AlumnoServlet extends HttpServlet {
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
+     * @throws java.sql.SQLException
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {        
+            throws ServletException, IOException, SQLException {        
         String action = request.getParameter("action");  
         logger.info("processRequest: " + action);
         switch (action) {
@@ -66,67 +77,51 @@ public class AlumnoServlet extends HttpServlet {
     }
     
     public void getAlumnos(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        Gson gson = new Gson();                                                                   //Create object json
-        response.setContentType("application/json; charset=UTF-8");                           //Define content type
+            throws ServletException, IOException {                                                                                
         try {
-            AlumnoDAO alumnoDAO = new AlumnoDAOImpl();                                            //*DAO Implement
-            List<AlumnoDTO> alumnos = alumnoDAO.getAlumnos();                                     //*Get Method
-            if(alumnos != null) {                                                                 //Verify
-                String jsonString = gson.toJson(alumnos);                                      //Prepare JSON
-                response.getWriter().write(jsonString);                                         //Write JSON
-            } else {                                                                              //ELSE: Prepare Message Error
-                String hash = Util.getHash();                                                     //Generate hash
-                response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                           //Set Status Server
-                MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);     //Create Message
-                response.getWriter().write(gson.toJson(msg));                                //Convert to JSON and Write
-                logger.error("getAlumnos: " + hash);                                              //Logging hash
-            }
-        } catch (IOException e) {                                                                 //EXCEPTION  
-            String hash = Util.getHash();                                                         //Generate hash
-            response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                               //Set Status Server
-            MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);         //Create Message
-            response.getWriter().write(gson.toJson(msg));                                    //Convert to JSON and Write
-            logger.error("getAlumnos: " + hash);                                                  //Logging hash
-            logger.error("getAlumnos: " + e.getMessage(), e);                               //Logging exception
+            List<AlumnoDTO> alumnos = alumnoDAO.getAlumnos();
+            if(alumnos == null) {
+                prepareMessage(response, ServerMessage.EXCEPTION, HtmlResponseCode.INTERNAL_SERVER_ERROR);
+            } else if(alumnos.isEmpty()) {
+                prepareMessage(response, ServerMessage.NOT_RECORDS_FOUND, HtmlResponseCode.OK);
+            } else {
+                response.setContentType("application/json; charset=UTF-8");
+                String jsonString = gson.toJson(alumnos);
+                response.getWriter().write(jsonString);
+            }            
+        } catch (IOException | SQLException e) {
+            treatException("getAlumnos", e, response);                                           
         }
     }
     
     public void createAlumno(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        Gson gson = new Gson();
+        
         response.setContentType("application/json; charset=UTF-8");
         try {     
-            AlumnoDAO alumnoDAO = new AlumnoDAOImpl();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             int i = alumnoDAO.createAlumno(validate(request));
             if(i > 0){
-                MensajeDTO msg = new MensajeDTO(0, "", 0, "Items created: " + i);      //Create Message
+                MensajeDTO msg = new MensajeDTO("", "Items created: " + i); 
                 response.getWriter().write(gson.toJson(msg));                                //Convert to JSON and Write                
             } else {                
                 String hash = Util.getHash();                                                     //Generate hash
-                response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                           //Set Status Server
-                MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);     //Create Message
+                response.setStatus(HtmlResponseCode.INTERNAL_SERVER_ERROR);                           //Set Status Server
+                MensajeDTO msg = new MensajeDTO(hash, ServerMessage.M500);     //Create Message
                 response.getWriter().write(gson.toJson(msg));                                //Convert to JSON and Write
                 logger.error("createAlumno: " + hash);
                 logger.error("createAlumno: No se registró el alumno.");                    //Logging hash
             }           
         } catch (Exception e) {                                                              //EXCEPTION
-            String hash = Util.getHash();                                                         //Generate hash
-            response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                               //Set Status Server
-            MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);         //Create Message
-            response.getWriter().write(gson.toJson(msg));                                    //Convert to JSON and Write
-            logger.error("createAlumno: " + hash);                                                //Logging hash
-            logger.error("createAlumno: " + e.getMessage(), e);                             //Logging exception
+            treatException("createAlumno", e, response);
         }
     }
     
     public void getAlumno(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        Gson gson = new Gson();
+            throws ServletException, IOException, SQLException {
+   
         response.setContentType("application/json; charset=UTF-8");
         try {
-            AlumnoDAO alumnoDAO = new AlumnoDAOImpl();            
+                
             int idalumno = Integer.parseInt(request.getParameter("alumno"));  
             AlumnoDTO alumnoDTO = alumnoDAO.getAlumno(idalumno);            
             if(alumnoDTO != null) {
@@ -134,79 +129,61 @@ public class AlumnoServlet extends HttpServlet {
                 response.getWriter().write(jsonString);
             } else {
                 String hash = Util.getHash();                                                     //Generate hash
-                response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                           //Set Status Server
-                MensajeDTO msg = new MensajeDTO(0, hash, 1, "Alumno no existente");  //Create Message
+                response.setStatus(HtmlResponseCode.INTERNAL_SERVER_ERROR);                           //Set Status Server
+                MensajeDTO msg = new MensajeDTO(hash, "Alumno no existente");  //Create Message
                 response.getWriter().write(gson.toJson(msg));                                //Convert to JSON and Write
                 logger.error("getAlumno: " + hash);
                 logger.error("getAlumno: Alumno no existente.");                            //Logging hash
             }
             
         } catch (IOException | NumberFormatException e) {
-            String hash = Util.getHash();                                                         //Generate hash
-            response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                               //Set Status Server
-            MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);         //Create Message
-            response.getWriter().write(gson.toJson(msg));                                    //Convert to JSON and Write
-            logger.error("getAlumno: " + hash);                                                   //Logging hash
-            logger.error("getAlumno: " + e.getMessage(), e);                                //Logging exception
+            treatException("getAlumno", e, response);
         }
     }
     
     public void updateAlumno(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        Gson gson = new Gson();
+            throws ServletException, IOException, SQLException {      
         response.setContentType("application/json; charset=UTF-8");
-        try {
-            AlumnoDAO alumnoDAO = new AlumnoDAOImpl();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {                       
             AlumnoDTO alumnoDTO = validate(request);
             int i = alumnoDAO.updateAlumno(alumnoDTO);
             if(i > 0) {
-                MensajeDTO msg = new MensajeDTO(0, "", 0, "Items updated: " + i);      //Create Message
+                MensajeDTO msg = new MensajeDTO("", "Items updated: " + i);      //Create Message
                 response.getWriter().write(gson.toJson(msg));                                //Convert to JSON and Write
             } else {
                 String hash = Util.getHash();                                                     //Generate hash
-                response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                           //Set Status Server
-                MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);     //Create Message
+                response.setStatus(HtmlResponseCode.INTERNAL_SERVER_ERROR);                           //Set Status Server
+                MensajeDTO msg = new MensajeDTO(hash, ServerMessage.M500);     //Create Message
                 response.getWriter().write(gson.toJson(msg));                                //Convert to JSON and Write
                 logger.error("updateAlumno: " + hash);
                 logger.error("updateAlumno: No se actualizó el alumno.");                    //Logging hash
             }
         } catch (IOException | NumberFormatException e) {
-            String hash = Util.getHash();                                                         //Generate hash
-            response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                               //Set Status Server
-            MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);         //Create Message
-            response.getWriter().write(gson.toJson(msg));                                    //Convert to JSON and Write
-            logger.error("updateAlumno: " + hash);                                                //Logging hash
-            logger.error("updateAlumno: " + e.getMessage(), e);                             //Logging exception
+            treatException("updateAlumno", e, response);
         }
     }
     
     public void deleteAlumno(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        Gson gson = new Gson();
+            throws ServletException, IOException, SQLException {
+      
         response.setContentType("application/json; charset=UTF-8");
         try {
-            AlumnoDAO alumnoDAO = new AlumnoDAOImpl();
+
             String alumnos = request.getParameter("alumnos");
             int i = alumnoDAO.deleteAlumno(alumnos);
             if(i > 0) {
-                MensajeDTO msg = new MensajeDTO(0, "", 0, "Items deleted: " + i);      //Create Message
+                MensajeDTO msg = new MensajeDTO("", "Items deleted: " + i);      //Create Message
                 response.getWriter().write(gson.toJson(msg));                                //Convert to JSON and Write
             } else {
                 String hash = Util.getHash();                                                     //Generate hash
-                response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                           //Set Status Server
-                MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);     //Create Message
+                response.setStatus(HtmlResponseCode.INTERNAL_SERVER_ERROR);                           //Set Status Server
+                MensajeDTO msg = new MensajeDTO(hash, ServerMessage.M500);     //Create Message
                 response.getWriter().write(gson.toJson(msg));                                //Convert to JSON and Write
                 logger.error("deleteAlumno: " + hash);
                 logger.error("deleteAlumno: No se eliminaron los registros.");                    //Logging hash
             }
         } catch (IOException | NumberFormatException  e) {
-            String hash = Util.getHash();                                                         //Generate hash
-            response.setStatus(HtmlError.INTERNAL_SERVER_ERROR);                               //Set Status Server
-            MensajeDTO msg = new MensajeDTO(0, hash, 1, ServerMessage.M500);         //Create Message
-            response.getWriter().write(gson.toJson(msg));                                    //Convert to JSON and Write
-            logger.error("deleteAlumno: " + hash);                                                //Logging hash
-            logger.error("deleteAlumno: " + e.getMessage(), e);                             //Logging exception
+            treatException("deleteAlumno", e, response);
         }
     }
 
@@ -224,6 +201,29 @@ public class AlumnoServlet extends HttpServlet {
         return alumnoDTO;
     }
 
+    public void treatException(String method, Exception e, HttpServletResponse response) 
+            throws IOException {        
+        response.setContentType("application/json; charset=UTF-8");
+        response.setStatus(HtmlResponseCode.INTERNAL_SERVER_ERROR);
+        String hash = Util.getHash();
+        MensajeDTO msg = new MensajeDTO(hash, ServerMessage.M500);
+        response.getWriter().write(gson.toJson(msg));
+        logger.error(method + ": " + hash);
+        logger.error(method + ": " + e.getMessage(), e);
+    }
+
+    public void prepareMessage(HttpServletResponse response, String message, int status) {
+        response.setContentType("application/json; charset=UTF-8");
+        response.setStatus(status);
+        try {
+            String hash = Util.getHash();
+            MensajeDTO msg = new MensajeDTO(hash, message);
+            response.getWriter().write(gson.toJson(msg));
+        } catch (IOException e) {
+            logger.error("prepareMessage: " + e.getMessage(), e);
+        }
+    }
+
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
@@ -236,7 +236,11 @@ public class AlumnoServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (SQLException ex) {
+            java.util.logging.Logger.getLogger(AlumnoServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -250,7 +254,11 @@ public class AlumnoServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (SQLException ex) {
+            java.util.logging.Logger.getLogger(AlumnoServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
