@@ -1,0 +1,46 @@
+/*
+* {
+  margin: 0;
+  padding: 0;
+}
+
+app-table {
+  display: flex;
+  flex-wrap: wrap;
+}
+*/
+
+* {
+  box-sizing: border-box;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Nunito';
+  
+}
+
+
+
+body * {
+  /*border: 1px solid orange;*/
+}
+
+
+app-table {
+  display: grid;
+  /*
+    grid-template-areas:        
+        "content";        
+    grid-template-rows: auto;
+    grid-template-columns: auto; 
+    */
+  grid-template-columns: repeat(18, 1fr);
+  /* Defines 3 columns of equal width */
+  grid-template-rows: repeat(9, 1fr);
+  /* Defines 3 rows of equal height */
+  height: 100%;
+}
