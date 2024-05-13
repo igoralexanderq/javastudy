@@ -1,0 +1,15 @@
+<div class="content" [ngStyle]="bgImage(element)">
+    <div class="element" [ngStyle]="bgColor(element)">
+        <div class="head">
+            <div class="atomic-number">{{ element.number }}</div>
+            <div class="atomic-mass">{{ element.atomic_mass }}</div>
+        </div>
+        <div class="body">
+            <div class="symbol">{{ element.symbol }}</div>
+            <div class="name">{{ element.name }}</div>
+        </div>
+        <div class="footer">
+            <div class="group">{{ element.phase }}</div>
+        </div>
+    </div>
+</div>
